@@ -1,0 +1,78 @@
+@model LebanonBasketballReservation.Business.DTOs.ReservationDto
+@{ ViewData["Title"] = "Reservation details"; }
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="h4 fw-bold mb-0">Reservation #@Model.Id</h1>
+                <partial name="_StatusBadge" model="@Model.Status" />
+            </div>
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 fw-normal text-muted">Stadium</dt>
+                        <dd class="col-sm-8 fw-semibold">@Model.StadiumName</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Court</dt>
+                        <dd class="col-sm-8">@Model.CourtName</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Address</dt>
+                        <dd class="col-sm-8">@Model.StadiumAddress</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Date</dt>
+                        <dd class="col-sm-8">@Model.Date.ToString("dddd, dd MMM yyyy")</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Time</dt>
+                        <dd class="col-sm-8">
+                            @Model.StartTime.ToString("HH\\:mm") – @Model.EndTime.ToString("HH\\:mm")
+                        </dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Total price</dt>
+                        <dd class="col-sm-8 fw-bold text-brand">$@Model.TotalPrice.ToString("N2")</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Booked on</dt>
+                        <dd class="col-sm-8">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</dd>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                        {
+                            <dt class="col-sm-4 fw-normal text-muted">Your notes</dt>
+                            <dd class="col-sm-8">@Model.Notes</dd>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.CancellationReason))
+                        {
+                            <dt class="col-sm-4 fw-normal text-muted">Reason</dt>
+                            <dd class="col-sm-8">@Model.CancellationReason</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>All reservations
+                </a>
+
+                @if (Model.CanCancel)
+                {
+                    <a asp-action="Cancel" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                        <i class="bi bi-x-circle me-1"></i>Cancel reservation
+                    </a>
+                }
+
+                @if (Model.CanReview)
+                {
+                    <a asp-controller="Reviews" asp-action="Create" asp-route-reservationId="@Model.Id"
+                       class="btn btn-brand">
+                        <i class="bi bi-star me-1"></i>Leave a review
+                    </a>
+                }
+
+                <a asp-controller="Stadiums" asp-action="Details" asp-route-id="@Model.StadiumId" asp-area=""
+                   class="btn btn-outline-secondary">View stadium</a>
+            </div>
+        </div>
+    </div>
+</div>

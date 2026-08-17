@@ -1,0 +1,157 @@
+@model LebanonBasketballReservation.Web.ViewModels.Court.TimeSlotManagerViewModel
+@{
+    ViewData["Title"] = "Time slots";
+    var slots = Model.Slots.ToList();
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Stadium" asp-action="Index">My stadiums</a></li>
+            <li class="breadcrumb-item">
+                <a asp-controller="Courts" asp-action="Index" asp-route-stadiumId="@Model.Court.StadiumId">Courts</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Court.Name</li>
+        </ol>
+    </nav>
+
+    <h1 class="h4 fw-bold mb-4">
+        <i class="bi bi-clock text-brand me-2"></i>Time slots — @Model.Court.Name
+    </h1>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold">Generate slots</div>
+                <div class="card-body">
+                    <form asp-action="Generate" method="post" novalidate>
+                        <div asp-validation-summary="All" class="alert alert-danger py-2 small" role="alert"></div>
+                        <input type="hidden" name="CourtId" value="@Model.Court.Id" />
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">From date</label>
+                                <input type="date" name="FromDate" class="form-control"
+                                       value="@Model.GenerateForm.FromDate.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">To date</label>
+                                <input type="date" name="ToDate" class="form-control"
+                                       value="@Model.GenerateForm.ToDate.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Opens at</label>
+                                <input type="time" name="StartTime" class="form-control"
+                                       value="@Model.GenerateForm.StartTime.ToString("HH\\:mm")" required />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Closes at</label>
+                                <input type="time" name="EndTime" class="form-control"
+                                       value="@Model.GenerateForm.EndTime.ToString("HH\\:mm")" required />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Slot duration (minutes)</label>
+                                <select name="SlotDurationMinutes" class="form-select">
+                                    @foreach (var d in new[] { 30, 60, 90, 120 })
+                                    {
+                                        <option value="@d" selected="@(Model.GenerateForm.SlotDurationMinutes == d)">
+                                            @d minutes
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-text mb-3">Existing slots are skipped, so it is safe to re-run.</div>
+
+                        <button type="submit" class="btn btn-brand w-100">
+                            <i class="bi bi-magic me-1"></i>Generate slots
+                        </button>
+                    </form>
+
+                    <hr />
+
+                    <form asp-action="ClearFuture" method="post"
+                          data-confirm="Remove every unbooked future slot for this court?">
+                        <input type="hidden" name="courtId" value="@Model.Court.Id" />
+                        <button class="btn btn-outline-danger btn-sm w-100">
+                            <i class="bi bi-trash me-1"></i>Clear unbooked future slots
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <form method="get" class="row g-2 align-items-end">
+                        <input type="hidden" name="courtId" value="@Model.Court.Id" />
+                        <div class="col">
+                            <label class="form-label fw-semibold small mb-1">Slots on</label>
+                            <input type="date" name="date" class="form-control form-control-sm"
+                                   value="@Model.Date.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-sm btn-outline-secondary">Show</button>
+                        </div>
+                    </form>
+                </div>
+
+                @if (slots.Count == 0)
+                {
+                    <div class="card-body text-center text-muted py-4">
+                        <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
+                        <span class="small">No slots on @Model.Date.ToString("dd MMM yyyy").</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var slot in slots)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@slot.Label</td>
+                                        <td>
+                                            @if (slot.IsAvailable)
+                                            {
+                                                <span class="badge bg-success">Open</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Booked</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <form asp-action="Delete" method="post">
+                                                <input type="hidden" name="id" value="@slot.Id" />
+                                                <input type="hidden" name="courtId" value="@Model.Court.Id" />
+                                                <input type="hidden" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" />
+                                                <button class="btn btn-sm btn-outline-danger" title="Delete slot">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

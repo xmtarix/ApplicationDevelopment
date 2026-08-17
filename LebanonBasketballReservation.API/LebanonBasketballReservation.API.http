@@ -1,0 +1,6 @@
+@LebanonBasketballReservation.API_HostAddress = http://localhost:5226
+
+GET {{LebanonBasketballReservation.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

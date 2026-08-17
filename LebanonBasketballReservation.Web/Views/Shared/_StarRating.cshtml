@@ -1,0 +1,30 @@
+@model (double Rating, int Count)
+@{
+    // Half-star granularity: a 4.6 shows four full stars plus a half.
+    var full = (int)Math.Floor(Model.Rating);
+    var hasHalf = Model.Rating - full >= 0.25 && Model.Rating - full < 0.75;
+    if (Model.Rating - full >= 0.75) full++;
+    var empty = 5 - full - (hasHalf ? 1 : 0);
+}
+<span class="text-warning" title="@Model.Rating.ToString("0.0") out of 5">
+    @for (var i = 0; i < full; i++)
+    {
+        <i class="bi bi-star-fill"></i>
+    }
+    @if (hasHalf)
+    {
+        <i class="bi bi-star-half"></i>
+    }
+    @for (var i = 0; i < empty; i++)
+    {
+        <i class="bi bi-star text-muted"></i>
+    }
+</span>
+@if (Model.Count > 0)
+{
+    <span class="text-muted small ms-1">@Model.Rating.ToString("0.0") (@Model.Count)</span>
+}
+else
+{
+    <span class="text-muted small ms-1">No reviews yet</span>
+}

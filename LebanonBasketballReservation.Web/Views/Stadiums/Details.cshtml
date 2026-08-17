@@ -1,0 +1,228 @@
+@using LebanonBasketballReservation.Data
+@using LebanonBasketballReservation.Data.Enums
+@model LebanonBasketballReservation.Web.ViewModels.Stadium.StadiumDetailsViewModel
+@{
+    var s = Model.Stadium;
+    ViewData["Title"] = s.Name;
+    var isCustomer = User.Identity?.IsAuthenticated == true && User.IsInRole(RoleNames.Customer);
+    var today = DateTime.Today.ToString("yyyy-MM-dd");
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Stadiums" asp-action="Index">Stadiums</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@s.Name</li>
+        </ol>
+    </nav>
+
+    @if (s.Status != StadiumStatus.Active)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-eye-slash me-2"></i>
+            This stadium is <strong>@s.Status</strong> and is not visible to customers.
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="stadium-hero">
+                    @if (!string.IsNullOrEmpty(s.MainImagePath))
+                    {
+                        <img src="@s.MainImagePath" alt="@s.Name" />
+                    }
+                    else
+                    {
+                        <div class="stadium-thumb-placeholder"><i class="bi bi-building"></i></div>
+                    }
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                        <div>
+                            <h1 class="h3 fw-bold mb-1">@s.Name</h1>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-geo-alt me-1"></i>@s.Address, @s.FullLocation
+                            </p>
+                            <partial name="_StarRating" model="@((s.AverageRating, s.ReviewCount))" />
+                        </div>
+
+                        @if (isCustomer)
+                        {
+                            <form asp-area="Customer" asp-controller="Favorites" asp-action="Toggle" method="post">
+                                <input type="hidden" name="stadiumId" value="@s.Id" />
+                                <input type="hidden" name="returnUrl" value="/Stadiums/Details/@s.Id" />
+                                <button type="submit" class="btn @(Model.IsFavorite ? "btn-danger" : "btn-outline-danger")">
+                                    <i class="bi @(Model.IsFavorite ? "bi-heart-fill" : "bi-heart") me-1"></i>
+                                    @(Model.IsFavorite ? "Saved" : "Save")
+                                </button>
+                            </form>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(s.Description))
+                    {
+                        <p class="mt-3 mb-3">@s.Description</p>
+                    }
+
+                    <div class="d-flex flex-wrap gap-3 small">
+                        @if (!string.IsNullOrWhiteSpace(s.Phone))
+                        {
+                            <span><i class="bi bi-telephone text-brand me-1"></i>@s.Phone</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(s.Email))
+                        {
+                            <span><i class="bi bi-envelope text-brand me-1"></i>@s.Email</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="h5 fw-bold mb-3">Courts</h2>
+
+            @if (!s.Courts.Any())
+            {
+                <div class="card border-0 shadow-sm">
+                    <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                             {
+                                 Icon = "bi-dribbble",
+                                 Title = "No courts listed yet",
+                                 Message = "This stadium has not added any courts."
+                             })" />
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var c in s.Courts.Where(c => c.IsBookable))
+                    {
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h3 class="h6 fw-bold mb-0">@c.Name</h3>
+                                        <span class="badge @(c.IsIndoor ? "bg-primary" : "bg-success")">@c.TypeLabel</span>
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(c.Description))
+                                    {
+                                        <p class="text-muted small mb-2">@c.Description</p>
+                                    }
+
+                                    <p class="fw-bold text-brand mb-1">$@c.HourlyPrice.ToString("0.##") <span class="fw-normal text-muted small">/ hour</span></p>
+                                    <p class="text-muted small mb-3"><i class="bi bi-people me-1"></i>Up to @c.Capacity people</p>
+
+                                    @if (isCustomer)
+                                    {
+                                        <label class="form-label small fw-semibold" for="date-@c.Id">Choose a date</label>
+                                        <input type="date" id="date-@c.Id" class="form-control form-control-sm date-picker mb-2"
+                                               data-court-id="@c.Id" min="@today" />
+                                        <div class="slot-container-@c.Id"></div>
+                                    }
+                                    else if (User.Identity?.IsAuthenticated != true)
+                                    {
+                                        <a asp-controller="Account" asp-action="Login"
+                                           asp-route-returnUrl="@($"/Stadiums/Details/{s.Id}")"
+                                           class="btn btn-outline-brand btn-sm w-100">
+                                            Log in to book
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <h2 class="h5 fw-bold mt-4 mb-3">
+                Reviews
+                @if (s.ReviewCount > 0)
+                {
+                    <span class="text-muted fw-normal">(@s.ReviewCount)</span>
+                }
+            </h2>
+
+            @if (!s.Reviews.Any())
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center text-muted py-4">
+                        <i class="bi bi-chat-quote fs-3 d-block mb-2"></i>
+                        No reviews yet. Play here and be the first to leave one.
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="vstack gap-3">
+                    @foreach (var r in s.Reviews.Take(10))
+                    {
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong>@r.CustomerName</strong>
+                                    <small class="text-muted">@r.CreatedAt.ToString("dd MMM yyyy")</small>
+                                </div>
+                                <div class="text-warning mb-2">
+                                    @for (var i = 0; i < 5; i++)
+                                    {
+                                        <i class="bi @(i < r.Rating ? "bi-star-fill" : "bi-star text-muted")"></i>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(r.Comment))
+                                {
+                                    <p class="mb-0">@r.Comment</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="display-6 text-warning mb-1"><i class="bi bi-star-fill"></i></div>
+                    <p class="h3 fw-bold mb-0">@s.AverageRating.ToString("0.0")</p>
+                    <p class="text-muted small mb-0">
+                        @(s.ReviewCount > 0 ? $"from {s.ReviewCount} review{(s.ReviewCount == 1 ? "" : "s")}" : "No reviews yet")
+                    </p>
+                </div>
+            </div>
+
+            @if (s.OpeningHours.Any())
+            {
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-white fw-semibold">
+                        <i class="bi bi-clock me-2 text-brand"></i>Opening hours
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var h in s.OpeningHours)
+                        {
+                            <li class="list-group-item d-flex justify-content-between small">
+                                <span>@h.DayName</span>
+                                <span class="@(h.IsClosed ? "text-muted" : "fw-semibold")">@h.Hours</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (s.HasCoordinates)
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h3 class="h6 fw-semibold"><i class="bi bi-map me-2 text-brand"></i>Location</h3>
+                        <p class="small text-muted mb-2">@s.Address</p>
+                        <a class="btn btn-outline-secondary btn-sm w-100" target="_blank" rel="noopener noreferrer"
+                           href="https://www.openstreetmap.org/?mlat=@s.Latitude&mlon=@s.Longitude#map=16/@s.Latitude/@s.Longitude">
+                            <i class="bi bi-geo-alt me-1"></i>Open in maps
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+@model LebanonBasketballReservation.Web.ViewModels.Stadium.CreateStadiumViewModel
+@{ ViewData["Title"] = "Add stadium"; }
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="h4 fw-bold mb-1">Add a stadium</h1>
+            <p class="text-muted small mb-4">
+                An administrator reviews new stadiums before they appear to customers.
+            </p>
+
+            <form asp-action="Create" method="post" enctype="multipart/form-data" novalidate>
+                <partial name="_StadiumForm" model="Model" />
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-brand">
+                        <i class="bi bi-check2-circle me-1"></i>Submit for approval
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

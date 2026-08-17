@@ -1,0 +1,133 @@
+@model LebanonBasketballReservation.Web.ViewModels.Dashboard.CustomerDashboardViewModel
+@{ ViewData["Title"] = "My dashboard"; }
+
+<div class="container py-4">
+    <h1 class="h4 fw-bold mb-4"><i class="bi bi-speedometer2 text-brand me-2"></i>My dashboard</h1>
+
+    <div class="row g-3 mb-4">
+        @{
+            var tiles = new (string Label, string Value, string Icon)[]
+            {
+                ("Total bookings", Model.TotalReservations.ToString("N0"), "bi-calendar3"),
+                ("Completed", Model.CompletedReservations.ToString("N0"), "bi-flag"),
+                ("Total spent", "$" + Model.TotalSpent.ToString("N2"), "bi-cash-coin"),
+                ("Unread alerts", Model.UnreadNotifications.ToString("N0"), "bi-bell")
+            };
+        }
+        @foreach (var t in tiles)
+        {
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 shadow-sm stat-card h-100">
+                    <div class="card-body d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">@t.Label</div>
+                            <div class="stat-value">@t.Value</div>
+                        </div>
+                        <i class="bi @t.Icon text-brand fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.AwaitingReview.Any())
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-star text-warning me-2"></i>Rate your recent games
+            </div>
+            <div class="list-group list-group-flush">
+                @foreach (var r in Model.AwaitingReview)
+                {
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">@r.StadiumName</div>
+                            <div class="small text-muted">@r.CourtName · @r.Date.ToString("dd MMM yyyy")</div>
+                        </div>
+                        <a asp-controller="Reviews" asp-action="Create" asp-route-reservationId="@r.Id"
+                           class="btn btn-sm btn-brand">Review</a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">Upcoming reservations</span>
+                    <a asp-controller="Reservations" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                        View all
+                    </a>
+                </div>
+
+                @if (!Model.UpcomingReservations.Any())
+                {
+                    <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                             {
+                                 Icon = "bi-calendar-plus",
+                                 Title = "Nothing booked yet",
+                                 Message = "Find a court near you and reserve a slot.",
+                                 ActionText = "Find stadiums",
+                                 ActionUrl = Url.Action("Index", "Stadiums", new { area = "" }),
+                                 ActionIcon = "bi-search"
+                             })" />
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var r in Model.UpcomingReservations)
+                        {
+                            <a asp-controller="Reservations" asp-action="Details" asp-route-id="@r.Id"
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div>
+                                        <div class="fw-semibold">@r.StadiumName</div>
+                                        <div class="small text-muted">
+                                            @r.CourtName · @r.Date.ToString("ddd dd MMM")
+                                            at @r.StartTime.ToString("HH\\:mm")
+                                        </div>
+                                    </div>
+                                    <partial name="_StatusBadge" model="@r.Status" />
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">Favorites</span>
+                    <a asp-controller="Favorites" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                        View all
+                    </a>
+                </div>
+
+                @if (!Model.Favorites.Any())
+                {
+                    <div class="card-body text-center text-muted py-4">
+                        <i class="bi bi-heart fs-3 d-block mb-2"></i>
+                        <span class="small">Save stadiums you like to find them faster.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var s in Model.Favorites)
+                        {
+                            <a asp-controller="Stadiums" asp-action="Details" asp-route-id="@s.Id" asp-area=""
+                               class="list-group-item list-group-item-action">
+                                <div class="fw-semibold">@s.Name</div>
+                                <div class="small text-muted">@s.FullLocation</div>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

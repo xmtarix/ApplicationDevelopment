@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LebanonBasketballReservation.Business", "LebanonBasketballReservation.Business\LebanonBasketballReservation.Business.csproj", "{7FEB2D1B-EDD0-4106-89B8-D818B5B677E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LebanonBasketballReservation.Web", "LebanonBasketballReservation.Web\LebanonBasketballReservation.Web.csproj", "{34E3C67A-1597-49C7-8EA4-B0A2550FF4EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LebanonBasketballReservation.Data", "LebanonBasketballReservation.Data\LebanonBasketballReservation.Data.csproj", "{622E044A-4F60-4822-9205-6806B2D2C967}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LebanonBasketballReservation.API", "LebanonBasketballReservation.API\LebanonBasketballReservation.API.csproj", "{20F60D50-ED97-4DD1-A31B-E8EC074E3FAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LebanonBasketballReservation.Tests", "LebanonBasketballReservation.Tests\LebanonBasketballReservation.Tests.csproj", "{9F0DE2F9-3EEC-4186-BCB0-450E79E9FB5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7FEB2D1B-EDD0-4106-89B8-D818B5B677E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FEB2D1B-EDD0-4106-89B8-D818B5B677E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FEB2D1B-EDD0-4106-89B8-D818B5B677E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FEB2D1B-EDD0-4106-89B8-D818B5B677E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34E3C67A-1597-49C7-8EA4-B0A2550FF4EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34E3C67A-1597-49C7-8EA4-B0A2550FF4EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34E3C67A-1597-49C7-8EA4-B0A2550FF4EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34E3C67A-1597-49C7-8EA4-B0A2550FF4EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{622E044A-4F60-4822-9205-6806B2D2C967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{622E044A-4F60-4822-9205-6806B2D2C967}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{622E044A-4F60-4822-9205-6806B2D2C967}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{622E044A-4F60-4822-9205-6806B2D2C967}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20F60D50-ED97-4DD1-A31B-E8EC074E3FAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20F60D50-ED97-4DD1-A31B-E8EC074E3FAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20F60D50-ED97-4DD1-A31B-E8EC074E3FAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20F60D50-ED97-4DD1-A31B-E8EC074E3FAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F0DE2F9-3EEC-4186-BCB0-450E79E9FB5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F0DE2F9-3EEC-4186-BCB0-450E79E9FB5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F0DE2F9-3EEC-4186-BCB0-450E79E9FB5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F0DE2F9-3EEC-4186-BCB0-450E79E9FB5B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {831316D6-14D9-4817-8A5A-A15778943CD1}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,115 @@
+@using LebanonBasketballReservation.Data
+@model LebanonBasketballReservation.Web.ViewModels.Home.HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+    var showFavorites = User.Identity?.IsAuthenticated == true && User.IsInRole(RoleNames.Customer);
+}
+
+<section class="hero py-5">
+    <div class="container py-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <h1 class="display-4 fw-bold mb-3">
+                    Book your basketball court <span class="text-warning">in Lebanon</span>
+                </h1>
+                <p class="lead mb-4 text-white-50">
+                    Find and reserve courts across the country in seconds. No phone calls, no waiting.
+                </p>
+
+                <form asp-controller="Stadiums" asp-action="Index" method="get" class="row g-2 mb-4">
+                    <div class="col-sm-5">
+                        <label for="heroSearch" class="visually-hidden">Stadium name</label>
+                        <input id="heroSearch" name="Name" class="form-control form-control-lg"
+                               placeholder="Search stadiums…" />
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="heroGov" class="visually-hidden">Governorate</label>
+                        <select id="heroGov" name="GovernorateId" class="form-select form-select-lg">
+                            <option value="">All governorates</option>
+                            @foreach (var g in Model.Governorates)
+                            {
+                                <option value="@g.Id">@g.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-sm-3 d-grid">
+                        <button type="submit" class="btn btn-brand btn-lg">
+                            <i class="bi bi-search me-1"></i>Search
+                        </button>
+                    </div>
+                </form>
+
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light">
+                        Create a free account
+                    </a>
+                }
+            </div>
+            <div class="col-lg-5 text-center d-none d-lg-block">
+                <i class="bi bi-dribbble text-warning" style="font-size:11rem;opacity:.25"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 text-center p-4">
+                    <div class="text-brand fs-1 mb-2"><i class="bi bi-search"></i></div>
+                    <h5 class="fw-semibold">Search</h5>
+                    <p class="text-muted mb-0">Filter courts by location, price and indoor or outdoor.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 text-center p-4">
+                    <div class="text-brand fs-1 mb-2"><i class="bi bi-calendar-check"></i></div>
+                    <h5 class="fw-semibold">Book</h5>
+                    <p class="text-muted mb-0">Pick a time slot and confirm — the manager does the rest.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 text-center p-4">
+                    <div class="text-brand fs-1 mb-2"><i class="bi bi-dribbble"></i></div>
+                    <h5 class="fw-semibold">Play</h5>
+                    <p class="text-muted mb-0">Show up at your slot and enjoy the game.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">Featured stadiums</h2>
+            <a asp-controller="Stadiums" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                View all<i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        @if (!Model.FeaturedStadiums.Any())
+        {
+            <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                     {
+                         Icon = "bi-building",
+                         Title = "No stadiums listed yet",
+                         Message = "Once managers register and admins approve them, stadiums will appear here."
+                     })" />
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var s in Model.FeaturedStadiums)
+                {
+                    <div class="col-sm-6 col-lg-4">
+                        <partial name="_StadiumCard" model="@(new LebanonBasketballReservation.Web.ViewModels.Stadium.StadiumCardModel
+                                 {
+                                     Stadium = s,
+                                     ShowFavorite = showFavorites,
+                                     ReturnUrl = "/"
+                                 })" />
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

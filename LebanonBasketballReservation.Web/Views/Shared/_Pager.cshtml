@@ -1,0 +1,60 @@
+@model LebanonBasketballReservation.Web.ViewModels.Shared.PagerModel
+@functions {
+    // Merges the current filters with the target page so links keep the user's context.
+    Dictionary<string, string?> LinkFor(int page)
+    {
+        var values = new Dictionary<string, string?>(Model.RouteValues);
+        values[Model.PageParameterName] = page.ToString();
+        return values;
+    }
+}
+@if (Model.TotalPages > 1)
+{
+    var visible = Model.VisiblePages().ToList();
+
+    <nav aria-label="Pagination" class="mt-4">
+        <ul class="pagination justify-content-center mb-0">
+            <li class="page-item @(Model.HasPrevious ? "" : "disabled")">
+                <a class="page-link" asp-all-route-data="LinkFor(Model.Page - 1)" aria-label="Previous page">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+
+            @if (visible.First() > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-all-route-data="LinkFor(1)">1</a>
+                </li>
+                @if (visible.First() > 2)
+                {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                }
+            }
+
+            @foreach (var p in visible)
+            {
+                <li class="page-item @(p == Model.Page ? "active" : "")">
+                    <a class="page-link" asp-all-route-data="LinkFor(p)"
+                       aria-current="@(p == Model.Page ? "page" : null)">@p</a>
+                </li>
+            }
+
+            @if (visible.Last() < Model.TotalPages)
+            {
+                @if (visible.Last() < Model.TotalPages - 1)
+                {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                }
+                <li class="page-item">
+                    <a class="page-link" asp-all-route-data="LinkFor(Model.TotalPages)">@Model.TotalPages</a>
+                </li>
+            }
+
+            <li class="page-item @(Model.HasNext ? "" : "disabled")">
+                <a class="page-link" asp-all-route-data="LinkFor(Model.Page + 1)" aria-label="Next page">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}

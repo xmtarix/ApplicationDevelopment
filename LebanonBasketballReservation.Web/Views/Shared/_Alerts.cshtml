@@ -1,0 +1,24 @@
+@* Flash messages set via TempData["Success"] / TempData["Error"] / TempData["Info"]. *@
+@if (TempData["Success"] is string success && !string.IsNullOrWhiteSpace(success))
+{
+    <div class="alert alert-success alert-dismissible fade show mt-3 mb-0" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@success
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Error"] is string error && !string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger alert-dismissible fade show mt-3 mb-0" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@error
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Info"] is string info && !string.IsNullOrWhiteSpace(info))
+{
+    <div class="alert alert-info alert-dismissible fade show mt-3 mb-0" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i>@info
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}

@@ -1,0 +1,52 @@
+@model LebanonBasketballReservation.Web.ViewModels.Reservation.CancelReservationViewModel
+@{ ViewData["Title"] = "Cancel reservation"; }
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h5 fw-bold mb-3">
+                        <i class="bi bi-exclamation-triangle text-danger me-2"></i>Cancel this reservation?
+                    </h1>
+
+                    @if (Model.Reservation is not null)
+                    {
+                        <div class="alert alert-light border small">
+                            <strong>@Model.Reservation.StadiumName</strong> — @Model.Reservation.CourtName<br />
+                            @Model.Reservation.Date.ToString("dddd, dd MMM yyyy")
+                            at @Model.Reservation.StartTime.ToString("HH\\:mm")<br />
+                            <span class="text-muted">$@Model.Reservation.TotalPrice.ToString("N2")</span>
+                        </div>
+                    }
+
+                    <p class="text-muted small">This frees the slot for other players and cannot be undone.</p>
+
+                    <form asp-action="Cancel" method="post">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label asp-for="Reason" class="form-label fw-semibold small"></label>
+                            <textarea asp-for="Reason" class="form-control" rows="3"
+                                      placeholder="Let the manager know why (optional)"></textarea>
+                            <span asp-validation-for="Reason" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-circle me-1"></i>Yes, cancel it
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                                Keep reservation
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

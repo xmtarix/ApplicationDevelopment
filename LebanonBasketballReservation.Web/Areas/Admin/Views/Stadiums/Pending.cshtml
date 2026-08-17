@@ -1,0 +1,100 @@
+@model LebanonBasketballReservation.Business.DTOs.PagedResult<LebanonBasketballReservation.Business.DTOs.StadiumDto>
+@{ ViewData["Title"] = "Pending stadiums"; }
+
+<div class="container-fluid py-4">
+    <h1 class="h4 fw-bold mb-4">
+        <i class="bi bi-hourglass-split text-brand me-2"></i>Stadiums awaiting approval
+        <span class="badge bg-warning text-dark ms-1">@Model.TotalCount</span>
+    </h1>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                     {
+                         Icon = "bi-check2-circle",
+                         Title = "Nothing waiting for review",
+                         Message = "Every submitted stadium has been processed.",
+                         ActionText = "View all stadiums",
+                         ActionUrl = Url.Action("Index")
+                     })" />
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var s in Model.Items)
+            {
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-1">@s.Name</h2>
+                                    <p class="text-muted small mb-1">
+                                        <i class="bi bi-geo-alt me-1"></i>@s.Address, @s.FullLocation
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-person me-1"></i>@s.ManagerName
+                                        @if (!string.IsNullOrEmpty(s.ManagerEmail))
+                                        {
+                                            <span>· @s.ManagerEmail</span>
+                                        }
+                                    </p>
+                                </div>
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(s.Description))
+                            {
+                                <p class="small mb-3">@s.Description</p>
+                            }
+
+                            <p class="small text-muted mb-3">
+                                <i class="bi bi-dribbble me-1"></i>@s.CourtCount court@(s.CourtCount == 1 ? "" : "s")
+                                · Submitted @s.CreatedAt.ToString("dd MMM yyyy")
+                            </p>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <form asp-action="Approve" method="post" data-confirm="Approve &quot;@s.Name&quot; and make it public?">
+                                    <input type="hidden" name="id" value="@s.Id" />
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="bi bi-check2 me-1"></i>Approve
+                                    </button>
+                                </form>
+
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        data-bs-toggle="collapse" data-bs-target="#reject-@s.Id">
+                                    <i class="bi bi-x me-1"></i>Reject
+                                </button>
+
+                                <a asp-controller="Stadiums" asp-action="Details" asp-route-id="@s.Id"
+                                   class="btn btn-sm btn-outline-secondary">Details</a>
+                            </div>
+
+                            <div class="collapse mt-3" id="reject-@s.Id">
+                                <form asp-action="Reject" method="post">
+                                    <input type="hidden" name="id" value="@s.Id" />
+                                    <label for="reason-@s.Id" class="form-label small fw-semibold">
+                                        Reason (shared with the manager)
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        <input id="reason-@s.Id" name="reason" class="form-control"
+                                               placeholder="e.g. incomplete address" maxlength="500" />
+                                        <button type="submit" class="btn btn-danger">Confirm rejection</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <partial name="_Pager" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.PagerModel
+                 {
+                     Page = Model.Page,
+                     TotalPages = Model.TotalPages
+                 })" />
+    }
+</div>

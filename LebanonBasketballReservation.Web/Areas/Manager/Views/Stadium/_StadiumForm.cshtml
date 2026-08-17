@@ -1,0 +1,116 @@
+@model LebanonBasketballReservation.Web.ViewModels.Stadium.CreateStadiumViewModel
+@* Shared by Create and Edit so both stay in step. *@
+
+<div asp-validation-summary="All" class="alert alert-danger py-2 small" role="alert"></div>
+
+@if (Model.IsEdit)
+{
+    <input type="hidden" asp-for="Id" />
+}
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white fw-semibold">Stadium details</div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-12">
+                <label asp-for="Name" class="form-label fw-semibold small"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Description" class="form-label fw-semibold small"></label>
+                <textarea asp-for="Description" class="form-control" rows="4"
+                          placeholder="Facilities, parking, flooring…"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Address" class="form-label fw-semibold small"></label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Phone" class="form-label fw-semibold small"></label>
+                <input asp-for="Phone" class="form-control" placeholder="+961 1 234 567" />
+                <span asp-validation-for="Phone" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label fw-semibold small"></label>
+                <input asp-for="Email" class="form-control" placeholder="info@example.com" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white fw-semibold">Location</div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label asp-for="GovernorateId" class="form-label fw-semibold small"></label>
+                <select asp-for="GovernorateId" class="form-select" data-location="governorate">
+                    <option value="">Select a governorate</option>
+                    @foreach (var g in Model.Governorates)
+                    {
+                        <option value="@g.Id" selected="@(Model.GovernorateId == g.Id)">@g.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="GovernorateId" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="DistrictId" class="form-label fw-semibold small"></label>
+                <select asp-for="DistrictId" class="form-select" data-location="district">
+                    <option value="">Select a district</option>
+                    @foreach (var d in Model.Districts)
+                    {
+                        <option value="@d.Id" selected="@(Model.DistrictId == d.Id)">@d.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="DistrictId" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="AreaId" class="form-label fw-semibold small"></label>
+                <select asp-for="AreaId" class="form-select" data-location="area">
+                    <option value="">Select an area</option>
+                    @foreach (var a in Model.Areas)
+                    {
+                        <option value="@a.Id" selected="@(Model.AreaId == a.Id)">@a.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="AreaId" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Latitude" class="form-label fw-semibold small">Latitude (optional)</label>
+                <input asp-for="Latitude" class="form-control" step="any" placeholder="33.8938" />
+                <span asp-validation-for="Latitude" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Longitude" class="form-label fw-semibold small">Longitude (optional)</label>
+                <input asp-for="Longitude" class="form-control" step="any" placeholder="35.5018" />
+                <span asp-validation-for="Longitude" class="text-danger small"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white fw-semibold">Main photo</div>
+    <div class="card-body">
+        @if (!string.IsNullOrEmpty(Model.CurrentImagePath))
+        {
+            <img src="@Model.CurrentImagePath" alt="Current stadium photo"
+                 class="rounded mb-2" style="max-height:140px" />
+        }
+        <input type="file" name="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+        <div class="form-text">JPG, PNG or WebP, up to 5 MB. Leave empty to keep the current photo.</div>
+        <span class="text-danger small">@Html.ValidationMessage("imageFile")</span>
+    </div>
+</div>

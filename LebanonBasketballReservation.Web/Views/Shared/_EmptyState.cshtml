@@ -1,0 +1,21 @@
+@model LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+<div class="text-center py-5 px-3">
+    <div class="empty-state-icon mb-3">
+        <i class="bi @Model.Icon"></i>
+    </div>
+    <h5 class="fw-semibold">@Model.Title</h5>
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <p class="text-muted mb-3 mx-auto" style="max-width:32rem">@Model.Message</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.ActionText) && !string.IsNullOrWhiteSpace(Model.ActionUrl))
+    {
+        <a href="@Model.ActionUrl" class="btn btn-brand">
+            @if (!string.IsNullOrWhiteSpace(Model.ActionIcon))
+            {
+                <i class="bi @Model.ActionIcon me-1"></i>
+            }
+            @Model.ActionText
+        </a>
+    }
+</div>

@@ -1,0 +1,203 @@
+@using LebanonBasketballReservation.Data
+@inject LebanonBasketballReservation.Business.Interfaces.INotificationService Notifications
+@inject Microsoft.AspNetCore.Identity.UserManager<LebanonBasketballReservation.Data.Entities.ApplicationUser> UserManager
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var isCustomer = User.IsInRole(RoleNames.Customer);
+    var displayName = User.Identity?.Name ?? "";
+    var unreadCount = 0;
+
+    if (isAuthenticated && isCustomer)
+    {
+        var currentUserId = UserManager.GetUserId(User);
+        if (!string.IsNullOrEmpty(currentUserId))
+        {
+            unreadCount = await Notifications.GetUnreadCountAsync(currentUserId);
+        }
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · Lebanon Basketball</title>
+    <meta name="description" content="Find and book basketball courts across Lebanon." />
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @* Icons come from the CDN. To run fully offline, vendor bootstrap-icons into
+       wwwroot/lib/bootstrap-icons and point this href at the local copy instead. *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<a href="#main-content" class="visually-hidden-focusable skip-link">Skip to main content</a>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container-fluid px-3 px-lg-4">
+        <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+            <i class="bi bi-dribbble text-warning me-1"></i>LB<span class="text-warning">Basketball</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+                aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMain">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house me-1"></i>Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Stadiums" asp-action="Index">
+                        <i class="bi bi-search me-1"></i>Find Stadiums
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="About">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav align-items-lg-center gap-lg-1">
+                @if (isAuthenticated)
+                {
+                    @if (User.IsInRole(RoleNames.Admin))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                <i class="bi bi-shield-check me-1"></i>Admin
+                            </a>
+                        </li>
+                    }
+                    @if (User.IsInRole(RoleNames.StadiumManager))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Manager" asp-controller="Dashboard" asp-action="Index">
+                                <i class="bi bi-building me-1"></i>Manager
+                            </a>
+                        </li>
+                    }
+                    @if (isCustomer)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Customer" asp-controller="Dashboard" asp-action="Index">
+                                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" asp-area="Customer" asp-controller="Notifications"
+                               asp-action="Index" title="Notifications">
+                                <i class="bi bi-bell"></i>
+                                <span class="d-lg-none ms-1">Notifications</span>
+                                @if (unreadCount > 0)
+                                {
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        @(unreadCount > 9 ? "9+" : unreadCount.ToString())
+                                        <span class="visually-hidden">unread notifications</span>
+                                    </span>
+                                }
+                            </a>
+                        </li>
+                    }
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="avatar-circle">@(string.IsNullOrEmpty(displayName) ? "?" : displayName[..1].ToUpper())</span>
+                            <span class="d-none d-lg-inline text-truncate" style="max-width:12rem">@displayName</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li>
+                                <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">
+                                    <i class="bi bi-person-gear me-2"></i>My profile
+                                </a>
+                            </li>
+                            @if (isCustomer)
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-area="Customer" asp-controller="Reservations" asp-action="Index">
+                                        <i class="bi bi-calendar3 me-2"></i>My reservations
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-area="Customer" asp-controller="Favorites" asp-action="Index">
+                                        <i class="bi bi-heart me-2"></i>Favorites
+                                    </a>
+                                </li>
+                            }
+                            @if (User.IsInRole(RoleNames.StadiumManager))
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-area="Manager" asp-controller="Stadium" asp-action="Index">
+                                        <i class="bi bi-building me-2"></i>My stadiums
+                                    </a>
+                                </li>
+                            }
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Log out
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">Log in</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-brand px-3 ms-lg-2" asp-area="" asp-controller="Account" asp-action="Register">
+                            Get started
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-3 px-lg-4">
+    <partial name="_Alerts" />
+</div>
+
+<main id="main-content" class="flex-grow-1">
+    @RenderBody()
+</main>
+
+<footer class="bg-dark text-white-50 py-4 mt-5">
+    <div class="container">
+        <div class="row align-items-center g-3">
+            <div class="col-md-6">
+                <p class="mb-1 fw-bold text-white">
+                    <i class="bi bi-dribbble text-warning me-2"></i>Lebanon Basketball Reservation
+                </p>
+                <p class="small mb-0">Book your court online. Play your game.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a asp-area="" asp-controller="Home" asp-action="About" class="link-light text-decoration-none me-3 small">About</a>
+                <a asp-area="" asp-controller="Home" asp-action="Contact" class="link-light text-decoration-none me-3 small">Contact</a>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy" class="link-light text-decoration-none small">Privacy</a>
+                <p class="small mb-0 mt-2">&copy; @DateTime.Now.Year Lebanon Basketball. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

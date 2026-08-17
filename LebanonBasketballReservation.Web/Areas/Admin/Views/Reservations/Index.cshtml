@@ -1,0 +1,134 @@
+@using LebanonBasketballReservation.Data.Enums
+@using LebanonBasketballReservation.Business.DTOs
+@model PagedResult<ReservationDto>
+@{
+    ViewData["Title"] = "All reservations";
+    var filter = ViewData["Filter"] as ReservationFilterDto ?? new ReservationFilterDto();
+    var stadiums = ViewData["Stadiums"] as List<StadiumDto> ?? new List<StadiumDto>();
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h1 class="h4 fw-bold mb-0"><i class="bi bi-calendar3 text-brand me-2"></i>All reservations</h1>
+        <a asp-action="Report" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-graph-up me-1"></i>Revenue report
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Search</label>
+                    <input name="Search" value="@filter.Search" class="form-control form-control-sm"
+                           placeholder="Customer or stadium…" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Status</label>
+                    <select name="Status" class="form-select form-select-sm">
+                        <option value="">Any status</option>
+                        @foreach (var st in Enum.GetValues<ReservationStatus>())
+                        {
+                            <option value="@st" selected="@(filter.Status == st)">@st</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Stadium</label>
+                    <select name="StadiumId" class="form-select form-select-sm">
+                        <option value="">All stadiums</option>
+                        @foreach (var s in stadiums)
+                        {
+                            <option value="@s.Id" selected="@(filter.StadiumId == s.Id)">@s.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">From</label>
+                    <input type="date" name="FromDate" value="@filter.FromDate?.ToString("yyyy-MM-dd")"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">To</label>
+                    <input type="date" name="ToDate" value="@filter.ToDate?.ToString("yyyy-MM-dd")"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-12 d-flex gap-2">
+                    <button class="btn btn-sm btn-brand"><i class="bi bi-funnel me-1"></i>Filter</button>
+                    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                     {
+                         Icon = "bi-calendar-x",
+                         Title = "No reservations found",
+                         Message = "Try a different filter or date range."
+                     })" />
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white small text-muted">
+                Showing @Model.FirstItemIndex–@Model.LastItemIndex of @Model.TotalCount
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Customer</th>
+                            <th>Stadium / court</th>
+                            <th>When</th>
+                            <th class="text-end">Price</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in Model.Items)
+                        {
+                            <tr>
+                                <td class="text-muted small">@r.Id</td>
+                                <td>
+                                    <div class="fw-semibold">@r.CustomerName</div>
+                                    <div class="small text-muted">@r.CustomerEmail</div>
+                                </td>
+                                <td>
+                                    <div>@r.StadiumName</div>
+                                    <div class="small text-muted">@r.CourtName</div>
+                                </td>
+                                <td class="small">
+                                    @r.Date.ToString("dd MMM yyyy")<br />
+                                    <span class="text-muted">@r.StartTime.ToString("HH\\:mm") – @r.EndTime.ToString("HH\\:mm")</span>
+                                </td>
+                                <td class="text-end fw-semibold">$@r.TotalPrice.ToString("N2")</td>
+                                <td><partial name="_StatusBadge" model="@r.Status" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <partial name="_Pager" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.PagerModel
+                 {
+                     Page = Model.Page,
+                     TotalPages = Model.TotalPages,
+                     PageParameterName = "Page",
+                     RouteValues = new Dictionary<string, string?>
+                     {
+                         ["Search"] = filter.Search,
+                         ["Status"] = filter.Status?.ToString(),
+                         ["StadiumId"] = filter.StadiumId?.ToString(),
+                         ["FromDate"] = filter.FromDate?.ToString("yyyy-MM-dd"),
+                         ["ToDate"] = filter.ToDate?.ToString("yyyy-MM-dd")
+                     }
+                 })" />
+    }
+</div>

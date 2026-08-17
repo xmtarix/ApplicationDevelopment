@@ -1,0 +1,59 @@
+@{ ViewData["Title"] = "About"; }
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-3">About Lebanon Basketball Reservation</h1>
+            <p class="lead text-muted mb-4">
+                We make it easy to find and book basketball courts across Lebanon — no phone calls,
+                no waiting. Just search, select and play.
+            </p>
+
+            <h2 class="h5 fw-semibold mt-4">The problem we solve</h2>
+            <p>
+                Players and teams across Lebanon have had no central place to check which courts are free,
+                compare prices, or book a slot. Availability lived in phone calls and personal contacts.
+                This platform puts every participating court in one searchable, bookable directory.
+            </p>
+
+            <h2 class="h5 fw-semibold mt-4">How it works</h2>
+            <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 p-3">
+                        <div class="text-brand fs-3"><i class="bi bi-person-check"></i></div>
+                        <h3 class="h6 fw-semibold mb-1">For players</h3>
+                        <p class="text-muted small mb-0">
+                            Search by governorate, price and court type, then book a slot in seconds
+                            and manage everything from your dashboard.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 p-3">
+                        <div class="text-brand fs-3"><i class="bi bi-building"></i></div>
+                        <h3 class="h6 fw-semibold mb-1">For stadium owners</h3>
+                        <p class="text-muted small mb-0">
+                            List your stadium, manage courts and time slots, and confirm bookings
+                            while tracking revenue as it comes in.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 p-3">
+                        <div class="text-brand fs-3"><i class="bi bi-shield-check"></i></div>
+                        <h3 class="h6 fw-semibold mb-1">Reviewed listings</h3>
+                        <p class="text-muted small mb-0">
+                            Every stadium is checked by an administrator before it goes live,
+                            so the directory stays trustworthy.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <a asp-controller="Stadiums" asp-action="Index" class="btn btn-brand btn-lg">
+                    <i class="bi bi-search me-1"></i>Find a court
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

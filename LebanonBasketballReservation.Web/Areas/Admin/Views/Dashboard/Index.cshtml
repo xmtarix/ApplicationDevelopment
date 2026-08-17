@@ -1,0 +1,138 @@
+@model LebanonBasketballReservation.Business.DTOs.AdminDashboardStatsDto
+@{ ViewData["Title"] = "Admin dashboard"; }
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <h1 class="h4 fw-bold mb-0"><i class="bi bi-shield-check text-brand me-2"></i>Admin dashboard</h1>
+        <div class="d-flex gap-2">
+            <a asp-controller="Reservations" asp-action="Report" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-graph-up me-1"></i>Reports
+            </a>
+            @if (Model.PendingStadiums > 0)
+            {
+                <a asp-controller="Stadiums" asp-action="Pending" class="btn btn-sm btn-brand">
+                    <i class="bi bi-hourglass-split me-1"></i>@Model.PendingStadiums pending
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        @{
+            var tiles = new (string Label, string Value, string Icon)[]
+            {
+                ("Total users", Model.TotalUsers.ToString("N0"), "bi-people"),
+                ("Stadiums", Model.TotalStadiums.ToString("N0"), "bi-building"),
+                ("Pending approval", Model.PendingStadiums.ToString("N0"), "bi-hourglass-split"),
+                ("Courts", Model.TotalCourts.ToString("N0"), "bi-dribbble"),
+                ("Reservations", Model.TotalReservations.ToString("N0"), "bi-calendar3"),
+                ("Total revenue", "$" + Model.TotalRevenue.ToString("N0"), "bi-cash-coin")
+            };
+        }
+        @foreach (var t in tiles)
+        {
+            <div class="col-6 col-md-4 col-xl-2">
+                <div class="card border-0 shadow-sm stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="stat-label">@t.Label</div>
+                                <div class="stat-value">@t.Value</div>
+                            </div>
+                            <i class="bi @t.Icon text-brand fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-trophy text-brand me-2"></i>Top stadiums by revenue
+                </div>
+                @if (!Model.TopStadiums.Any())
+                {
+                    <div class="card-body text-center text-muted py-4">No reservation data yet.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Stadium</th>
+                                    <th class="text-end">Bookings</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var s in Model.TopStadiums)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@s.StadiumName</td>
+                                        <td class="text-end">@s.Count</td>
+                                        <td class="text-end text-success fw-semibold">$@s.Revenue.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-lightning-charge text-brand me-2"></i>This month
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0 small">
+                        <dt class="col-7 fw-normal text-muted">Revenue this month</dt>
+                        <dd class="col-5 text-end fw-semibold">$@Model.MonthlyRevenue.ToString("N2")</dd>
+
+                        <dt class="col-7 fw-normal text-muted">Reservations today</dt>
+                        <dd class="col-5 text-end fw-semibold">@Model.TodayReservations</dd>
+
+                        <dt class="col-7 fw-normal text-muted">Awaiting confirmation</dt>
+                        <dd class="col-5 text-end fw-semibold">@Model.PendingReservations</dd>
+
+                        <dt class="col-7 fw-normal text-muted">Active stadiums</dt>
+                        <dd class="col-5 text-end fw-semibold">@Model.ActiveStadiums</dd>
+
+                        <dt class="col-7 fw-normal text-muted">Customers</dt>
+                        <dd class="col-5 text-end fw-semibold">@Model.TotalCustomers</dd>
+
+                        <dt class="col-7 fw-normal text-muted">Managers</dt>
+                        <dd class="col-5 text-end fw-semibold">@Model.TotalManagers</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold">Quick actions</div>
+                <div class="list-group list-group-flush">
+                    <a asp-controller="Stadiums" asp-action="Pending" class="list-group-item list-group-item-action">
+                        <i class="bi bi-hourglass-split text-brand me-2"></i>Review pending stadiums
+                        @if (Model.PendingStadiums > 0)
+                        {
+                            <span class="badge bg-danger rounded-pill float-end">@Model.PendingStadiums</span>
+                        }
+                    </a>
+                    <a asp-controller="Users" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="bi bi-people text-brand me-2"></i>Manage users
+                    </a>
+                    <a asp-controller="Locations" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="bi bi-geo-alt text-brand me-2"></i>Manage locations
+                    </a>
+                    <a asp-controller="Reservations" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="bi bi-calendar3 text-brand me-2"></i>All reservations
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

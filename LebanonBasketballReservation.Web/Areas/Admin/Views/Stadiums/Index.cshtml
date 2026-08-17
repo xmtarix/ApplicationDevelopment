@@ -1,0 +1,123 @@
+@using LebanonBasketballReservation.Data.Enums
+@model LebanonBasketballReservation.Business.DTOs.PagedResult<LebanonBasketballReservation.Business.DTOs.StadiumDto>
+@{
+    ViewData["Title"] = "All stadiums";
+    var status = ViewData["Status"] as StadiumStatus?;
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h1 class="h4 fw-bold mb-0"><i class="bi bi-building text-brand me-2"></i>All stadiums</h1>
+        <a asp-action="Pending" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-hourglass-split me-1"></i>Pending approvals
+        </a>
+    </div>
+
+    <ul class="nav nav-pills mb-3 gap-1">
+        <li class="nav-item">
+            <a class="nav-link @(status is null ? "active" : "")" asp-action="Index">All</a>
+        </li>
+        @foreach (var st in Enum.GetValues<StadiumStatus>())
+        {
+            <li class="nav-item">
+                <a class="nav-link @(status == st ? "active" : "")"
+                   asp-action="Index" asp-route-status="@st">@st</a>
+            </li>
+        }
+    </ul>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                     {
+                         Icon = "bi-building",
+                         Title = "No stadiums here",
+                         Message = "No stadium matches this status filter."
+                     })" />
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Stadium</th>
+                            <th>Location</th>
+                            <th>Manager</th>
+                            <th class="text-center">Courts</th>
+                            <th class="text-center">Rating</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model.Items)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@s.Name</td>
+                                <td class="small text-muted">@s.FullLocation</td>
+                                <td class="small">@s.ManagerName</td>
+                                <td class="text-center">@s.CourtCount</td>
+                                <td class="text-center small">
+                                    @(s.ReviewCount > 0 ? $"{s.AverageRating:0.0} ({s.ReviewCount})" : "—")
+                                </td>
+                                <td>
+                                    @{
+                                        var badge = s.Status switch
+                                        {
+                                            StadiumStatus.Active => "bg-success",
+                                            StadiumStatus.Pending => "bg-warning text-dark",
+                                            StadiumStatus.Rejected => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @badge">@s.Status</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        <a asp-action="Details" asp-route-id="@s.Id"
+                                           class="btn btn-sm btn-outline-secondary" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        @if (s.Status == StadiumStatus.Pending)
+                                        {
+                                            <form asp-action="Approve" method="post">
+                                                <input type="hidden" name="id" value="@s.Id" />
+                                                <input type="hidden" name="returnAction" value="Index" />
+                                                <button class="btn btn-sm btn-success" title="Approve">
+                                                    <i class="bi bi-check2"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else if (s.Status is StadiumStatus.Active or StadiumStatus.Inactive)
+                                        {
+                                            <form asp-action="SetActive" method="post">
+                                                <input type="hidden" name="id" value="@s.Id" />
+                                                <input type="hidden" name="isActive" value="@(s.Status != StadiumStatus.Active)" />
+                                                <button class="btn btn-sm btn-outline-secondary"
+                                                        title="@(s.Status == StadiumStatus.Active ? "Hide from customers" : "Make visible")">
+                                                    <i class="bi @(s.Status == StadiumStatus.Active ? "bi-eye-slash" : "bi-eye")"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <partial name="_Pager" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.PagerModel
+                 {
+                     Page = Model.Page,
+                     TotalPages = Model.TotalPages,
+                     RouteValues = new Dictionary<string, string?> { ["status"] = status?.ToString() }
+                 })" />
+    }
+</div>

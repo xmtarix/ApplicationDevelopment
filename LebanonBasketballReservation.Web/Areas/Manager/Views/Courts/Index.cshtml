@@ -1,0 +1,97 @@
+@model LebanonBasketballReservation.Web.ViewModels.Court.CourtListViewModel
+@{
+    ViewData["Title"] = "Courts";
+    var courts = Model.Courts.ToList();
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Stadium" asp-action="Index">My stadiums</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Stadium.Name</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <h1 class="h4 fw-bold mb-0">
+            <i class="bi bi-dribbble text-brand me-2"></i>Courts at @Model.Stadium.Name
+        </h1>
+        <a asp-action="Create" asp-route-stadiumId="@Model.Stadium.Id" class="btn btn-sm btn-brand">
+            <i class="bi bi-plus-lg me-1"></i>Add court
+        </a>
+    </div>
+
+    @if (courts.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                     {
+                         Icon = "bi-dribbble",
+                         Title = "No courts yet",
+                         Message = "Add a court, then generate time slots so customers can book it.",
+                         ActionText = "Add court",
+                         ActionUrl = Url.Action("Create", new { stadiumId = Model.Stadium.Id }),
+                         ActionIcon = "bi-plus-lg"
+                     })" />
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Court</th>
+                            <th>Type</th>
+                            <th class="text-center">Capacity</th>
+                            <th class="text-end">Price/hr</th>
+                            <th class="text-center">Open slots</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in courts)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@c.Name</div>
+                                    @if (!string.IsNullOrWhiteSpace(c.Description))
+                                    {
+                                        <div class="small text-muted text-truncate" style="max-width:22rem">@c.Description</div>
+                                    }
+                                </td>
+                                <td><span class="badge @(c.IsIndoor ? "bg-primary" : "bg-success")">@c.TypeLabel</span></td>
+                                <td class="text-center">@c.Capacity</td>
+                                <td class="text-end fw-semibold">$@c.HourlyPrice.ToString("0.##")</td>
+                                <td class="text-center">@c.AvailableSlotCount</td>
+                                <td><span class="badge bg-light text-dark border">@c.Status</span></td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        <a asp-controller="TimeSlots" asp-action="Generate" asp-route-courtId="@c.Id"
+                                           class="btn btn-sm btn-outline-brand" title="Time slots">
+                                            <i class="bi bi-clock"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@c.Id"
+                                           class="btn btn-sm btn-outline-secondary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form asp-action="Delete" method="post"
+                                              data-confirm="Delete court &quot;@c.Name&quot;?">
+                                            <input type="hidden" name="id" value="@c.Id" />
+                                            <input type="hidden" name="stadiumId" value="@Model.Stadium.Id" />
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

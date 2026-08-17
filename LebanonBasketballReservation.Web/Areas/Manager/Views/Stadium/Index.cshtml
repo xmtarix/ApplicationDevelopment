@@ -1,0 +1,98 @@
+@using LebanonBasketballReservation.Data.Enums
+@model IEnumerable<LebanonBasketballReservation.Business.DTOs.StadiumDto>
+@{
+    ViewData["Title"] = "My stadiums";
+    var items = Model.ToList();
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <h1 class="h4 fw-bold mb-0"><i class="bi bi-building text-brand me-2"></i>My stadiums</h1>
+        <a asp-action="Create" class="btn btn-sm btn-brand">
+            <i class="bi bi-plus-lg me-1"></i>Add stadium
+        </a>
+    </div>
+
+    @if (items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                     {
+                         Icon = "bi-building",
+                         Title = "You have no stadiums yet",
+                         Message = "Register a stadium, add its courts, then generate time slots so customers can book.",
+                         ActionText = "Add your first stadium",
+                         ActionUrl = Url.Action("Create"),
+                         ActionIcon = "bi-plus-lg"
+                     })" />
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var s in items)
+            {
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-1">@s.Name</h2>
+                                    <p class="small text-muted mb-0">
+                                        <i class="bi bi-geo-alt me-1"></i>@s.FullLocation
+                                    </p>
+                                </div>
+                                @{
+                                    var badge = s.Status switch
+                                    {
+                                        StadiumStatus.Active => "bg-success",
+                                        StadiumStatus.Pending => "bg-warning text-dark",
+                                        StadiumStatus.Rejected => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @badge">@s.Status</span>
+                            </div>
+
+                            @if (s.Status == StadiumStatus.Pending)
+                            {
+                                <div class="alert alert-warning py-2 small mb-2">
+                                    Awaiting admin approval. It is not yet visible to customers.
+                                </div>
+                            }
+
+                            <p class="small text-muted mb-3">
+                                <i class="bi bi-dribbble me-1"></i>@s.CourtCount court@(s.CourtCount == 1 ? "" : "s")
+                                @if (s.ReviewCount > 0)
+                                {
+                                    <span class="ms-2"><i class="bi bi-star-fill text-warning me-1"></i>@s.AverageRating.ToString("0.0") (@s.ReviewCount)</span>
+                                }
+                            </p>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a asp-controller="Courts" asp-action="Index" asp-route-stadiumId="@s.Id"
+                                   class="btn btn-sm btn-brand">
+                                    <i class="bi bi-dribbble me-1"></i>Courts
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@s.Id" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil me-1"></i>Edit
+                                </a>
+                                <a asp-controller="Stadiums" asp-action="Details" asp-route-id="@s.Id" asp-area=""
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye me-1"></i>Preview
+                                </a>
+                                <form asp-action="Delete" method="post"
+                                      data-confirm="Delete &quot;@s.Name&quot;? This cannot be undone.">
+                                    <input type="hidden" name="id" value="@s.Id" />
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

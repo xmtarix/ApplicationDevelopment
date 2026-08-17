@@ -1,0 +1,63 @@
+@model LebanonBasketballReservation.Web.ViewModels.Reservation.CreateReviewViewModel
+@{ ViewData["Title"] = "Write a review"; }
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h5 fw-bold mb-3">
+                        <i class="bi bi-star text-warning me-2"></i>Write a review
+                    </h1>
+
+                    @if (Model.Reservation is not null)
+                    {
+                        <div class="alert alert-light border small">
+                            <strong>@Model.Reservation.StadiumName</strong> — @Model.Reservation.CourtName<br />
+                            Played on @Model.Reservation.Date.ToString("dd MMM yyyy")
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="All" class="alert alert-danger py-2 small" role="alert"></div>
+                        <input type="hidden" asp-for="ReservationId" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small d-block">Your rating</label>
+                            <div class="rating-input">
+                                @for (var i = 5; i >= 1; i--)
+                                {
+                                    <input type="radio" name="Rating" id="star-@i" value="@i"
+                                           checked="@(Model.Rating == i)" />
+                                    <label for="star-@i" title="@i star@(i == 1 ? "" : "s")">
+                                        <i class="bi bi-star-fill"></i>
+                                    </label>
+                                }
+                            </div>
+                            <span asp-validation-for="Rating" class="text-danger small d-block"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Comment" class="form-label fw-semibold small"></label>
+                            <textarea asp-for="Comment" class="form-control" rows="4"
+                                      placeholder="How were the courts and facilities?"></textarea>
+                            <span asp-validation-for="Comment" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-brand">
+                                <i class="bi bi-send me-1"></i>Submit review
+                            </button>
+                            <a asp-controller="Reservations" asp-action="Details" asp-route-id="@Model.ReservationId"
+                               class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

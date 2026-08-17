@@ -1,0 +1,41 @@
+@model IEnumerable<LebanonBasketballReservation.Business.DTOs.StadiumDto>
+@{
+    ViewData["Title"] = "My favorites";
+    var items = Model.ToList();
+}
+
+<div class="container py-4">
+    <h1 class="h4 fw-bold mb-4"><i class="bi bi-heart-fill text-danger me-2"></i>My favorites</h1>
+
+    @if (items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                     {
+                         Icon = "bi-heart",
+                         Title = "No favorites yet",
+                         Message = "Tap the heart on any stadium to save it here.",
+                         ActionText = "Browse stadiums",
+                         ActionUrl = Url.Action("Index", "Stadiums", new { area = "" }),
+                         ActionIcon = "bi-search"
+                     })" />
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var s in items)
+            {
+                <div class="col-sm-6 col-lg-4">
+                    <partial name="_StadiumCard" model="@(new LebanonBasketballReservation.Web.ViewModels.Stadium.StadiumCardModel
+                             {
+                                 Stadium = s,
+                                 ShowFavorite = true,
+                                 IsFavorite = true,
+                                 ReturnUrl = "/Customer/Favorites"
+                             })" />
+                </div>
+            }
+        </div>
+    }
+</div>

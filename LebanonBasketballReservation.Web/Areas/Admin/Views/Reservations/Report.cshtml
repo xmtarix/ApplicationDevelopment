@@ -1,0 +1,179 @@
+@using LebanonBasketballReservation.Business.DTOs
+@model ReservationReportDto
+@{
+    ViewData["Title"] = "Revenue report";
+    var stadiums = ViewData["Stadiums"] as List<StadiumDto> ?? new List<StadiumDto>();
+    var selectedStadiumId = ViewData["SelectedStadiumId"] as int?;
+    var maxRevenue = Model.DailyStats.Count > 0 ? Model.DailyStats.Max(d => d.Revenue) : 0m;
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h1 class="h4 fw-bold mb-0"><i class="bi bi-graph-up text-brand me-2"></i>Revenue report</h1>
+        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary no-print">
+            <i class="bi bi-printer me-1"></i>Print
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4 no-print">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">From</label>
+                    <input type="date" name="from" value="@Model.From.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">To</label>
+                    <input type="date" name="to" value="@Model.To.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Stadium</label>
+                    <select name="stadiumId" class="form-select form-select-sm">
+                        <option value="">All stadiums</option>
+                        @foreach (var s in stadiums)
+                        {
+                            <option value="@s.Id" selected="@(selectedStadiumId == s.Id)">@s.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-sm btn-brand">Run report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <p class="text-muted small">
+        @Model.From.ToString("dd MMM yyyy") — @Model.To.ToString("dd MMM yyyy")
+        @if (!string.IsNullOrEmpty(Model.StadiumName))
+        {
+            <span>· @Model.StadiumName</span>
+        }
+    </p>
+
+    <div class="row g-3 mb-4">
+        @{
+            var tiles = new (string Label, string Value)[]
+            {
+                ("Total bookings", Model.TotalReservations.ToString("N0")),
+                ("Confirmed", Model.Confirmed.ToString("N0")),
+                ("Completed", Model.Completed.ToString("N0")),
+                ("Cancelled / rejected", (Model.Cancelled + Model.Rejected).ToString("N0")),
+                ("Total revenue", "$" + Model.TotalRevenue.ToString("N2")),
+                ("Average booking", "$" + Model.AverageBookingValue.ToString("N2"))
+            };
+        }
+        @foreach (var t in tiles)
+        {
+            <div class="col-6 col-md-4 col-xl-2">
+                <div class="card border-0 shadow-sm stat-card h-100">
+                    <div class="card-body">
+                        <div class="stat-label">@t.Label</div>
+                        <div class="stat-value">@t.Value</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.TotalReservations == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                     {
+                         Icon = "bi-bar-chart",
+                         Title = "No data for this period",
+                         Message = "No reservations were created in the selected date range."
+                     })" />
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white fw-semibold">Daily activity</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th class="text-center">Bookings</th>
+                                    <th class="text-end">Revenue</th>
+                                    <th style="width:35%">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var d in Model.DailyStats)
+                                {
+                                    var pct = maxRevenue == 0 ? 0 : (double)(d.Revenue / maxRevenue) * 100;
+                                    <tr>
+                                        <td class="small">@d.Date.ToString("ddd dd MMM")</td>
+                                        <td class="text-center">@d.Count</td>
+                                        <td class="text-end fw-semibold">$@d.Revenue.ToString("N2")</td>
+                                        <td>
+                                            <div class="progress" style="height:6px" role="progressbar"
+                                                 aria-valuenow="@((int)pct)" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-warning" style="width:@pct.ToString("0.##")%"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white fw-semibold">Status breakdown</div>
+                    <div class="card-body">
+                        <dl class="row small mb-0">
+                            <dt class="col-8 fw-normal text-muted">Pending</dt>
+                            <dd class="col-4 text-end fw-semibold">@Model.Pending</dd>
+                            <dt class="col-8 fw-normal text-muted">Confirmed</dt>
+                            <dd class="col-4 text-end fw-semibold">@Model.Confirmed</dd>
+                            <dt class="col-8 fw-normal text-muted">Completed</dt>
+                            <dd class="col-4 text-end fw-semibold">@Model.Completed</dd>
+                            <dt class="col-8 fw-normal text-muted">Cancelled</dt>
+                            <dd class="col-4 text-end fw-semibold">@Model.Cancelled</dd>
+                            <dt class="col-8 fw-normal text-muted">Rejected</dt>
+                            <dd class="col-4 text-end fw-semibold">@Model.Rejected</dd>
+                            <dt class="col-8 fw-normal text-muted">Cancellation rate</dt>
+                            <dd class="col-4 text-end fw-semibold">@Model.CancellationRate%</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                @if (Model.StadiumStats.Count > 1)
+                {
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white fw-semibold">By stadium</div>
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Stadium</th>
+                                        <th class="text-center">Bookings</th>
+                                        <th class="text-end">Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var s in Model.StadiumStats)
+                                    {
+                                        <tr>
+                                            <td class="small">@s.StadiumName</td>
+                                            <td class="text-center">@s.Count</td>
+                                            <td class="text-end fw-semibold">$@s.Revenue.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,14 @@
+@using LebanonBasketballReservation.Data.Enums
+@model ReservationStatus
+@{
+    var (css, icon) = Model switch
+    {
+        ReservationStatus.Pending   => ("bg-warning text-dark", "bi-hourglass-split"),
+        ReservationStatus.Confirmed => ("bg-success", "bi-check-circle"),
+        ReservationStatus.Completed => ("bg-primary", "bi-flag"),
+        ReservationStatus.Cancelled => ("bg-secondary", "bi-x-circle"),
+        ReservationStatus.Rejected  => ("bg-danger", "bi-slash-circle"),
+        _ => ("bg-light text-dark", "bi-question-circle")
+    };
+}
+<span class="badge @css"><i class="bi @icon me-1"></i>@Model</span>

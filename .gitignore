@@ -1,0 +1,52 @@
+﻿# Build output
+bin/
+obj/
+out/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Logs
+logs/
+*.log
+
+# Local SQLite database (created and seeded automatically on first run)
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets / sensitive config
+**/appsettings.*.json
+!**/appsettings.json
+!**/appsettings.Development.json
+**/secrets.json
+
+# Uploaded images (don't commit user uploads)
+**/wwwroot/images/stadiums/
+!**/wwwroot/images/stadiums/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Rider / JetBrains
+.idea/
+
+# Migrations (keep them committed — intentional)
+# !**/Migrations/
+
+# Test results
+TestResults/
+coverage/

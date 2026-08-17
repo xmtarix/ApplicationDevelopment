@@ -1,0 +1,188 @@
+@using LebanonBasketballReservation.Data.Enums
+@model LebanonBasketballReservation.Web.ViewModels.Dashboard.ManagerDashboardViewModel
+@{
+    ViewData["Title"] = "Manager dashboard";
+    var s = Model.Stats;
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <h1 class="h4 fw-bold mb-0"><i class="bi bi-building text-brand me-2"></i>Manager dashboard</h1>
+        <a asp-controller="Stadium" asp-action="Create" class="btn btn-sm btn-brand">
+            <i class="bi bi-plus-lg me-1"></i>Add stadium
+        </a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        @{
+            var tiles = new (string Label, string Value, string Icon)[]
+            {
+                ("My stadiums", s.TotalStadiums.ToString("N0"), "bi-building"),
+                ("Courts", s.TotalCourts.ToString("N0"), "bi-dribbble"),
+                ("Today", s.TodayReservations.ToString("N0"), "bi-calendar-day"),
+                ("Awaiting action", s.PendingReservations.ToString("N0"), "bi-hourglass-split"),
+                ("This month", "$" + s.MonthlyRevenue.ToString("N0"), "bi-cash-coin"),
+                ("Rating", s.ReviewCount > 0 ? s.AverageRating.ToString("0.0") : "—", "bi-star")
+            };
+        }
+        @foreach (var t in tiles)
+        {
+            <div class="col-6 col-md-4 col-xl-2">
+                <div class="card border-0 shadow-sm stat-card h-100">
+                    <div class="card-body d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">@t.Label</div>
+                            <div class="stat-value">@t.Value</div>
+                        </div>
+                        <i class="bi @t.Icon text-brand fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.PendingRequests.Any())
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-hourglass-split text-warning me-2"></i>Booking requests awaiting your decision
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Court</th>
+                            <th>When</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in Model.PendingRequests)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@r.CustomerName</div>
+                                    <div class="small text-muted">@r.CustomerEmail</div>
+                                </td>
+                                <td class="small">@r.StadiumName<br /><span class="text-muted">@r.CourtName</span></td>
+                                <td class="small">
+                                    @r.Date.ToString("dd MMM")<br />
+                                    <span class="text-muted">@r.StartTime.ToString("HH\\:mm") – @r.EndTime.ToString("HH\\:mm")</span>
+                                </td>
+                                <td class="text-end fw-semibold">$@r.TotalPrice.ToString("N2")</td>
+                                <td class="text-end">
+                                    <form asp-controller="Reservations" asp-action="Confirm" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@r.Id" />
+                                        <button class="btn btn-sm btn-success" title="Confirm">
+                                            <i class="bi bi-check2"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-controller="Reservations" asp-action="Reject" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@r.Id" />
+                                        <button class="btn btn-sm btn-outline-danger" title="Reject">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">Recent reservations</span>
+                    <a asp-controller="Reservations" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                        View all
+                    </a>
+                </div>
+
+                @if (!Model.RecentReservations.Any())
+                {
+                    <div class="card-body text-center text-muted py-4">No reservations yet.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Court</th>
+                                    <th>When</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in Model.RecentReservations)
+                                {
+                                    <tr>
+                                        <td class="small fw-semibold">@r.CustomerName</td>
+                                        <td class="small">@r.CourtName</td>
+                                        <td class="small">
+                                            @r.Date.ToString("dd MMM") @r.StartTime.ToString("HH\\:mm")
+                                        </td>
+                                        <td><partial name="_StatusBadge" model="@r.Status" /></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">My stadiums</span>
+                    <a asp-controller="Stadium" asp-action="Index" class="btn btn-sm btn-outline-secondary">Manage</a>
+                </div>
+
+                @if (!Model.MyStadiums.Any())
+                {
+                    <partial name="_EmptyState" model="@(new LebanonBasketballReservation.Web.ViewModels.Shared.EmptyStateModel
+                             {
+                                 Icon = "bi-building",
+                                 Title = "No stadiums yet",
+                                 Message = "Register your first stadium to start taking bookings.",
+                                 ActionText = "Add stadium",
+                                 ActionUrl = Url.Action("Create", "Stadium"),
+                                 ActionIcon = "bi-plus-lg"
+                             })" />
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var st in Model.MyStadiums)
+                        {
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">@st.Name</div>
+                                    <div class="small text-muted">@st.CourtCount court@(st.CourtCount == 1 ? "" : "s")</div>
+                                </div>
+                                @{
+                                    var badge = st.Status switch
+                                    {
+                                        StadiumStatus.Active => "bg-success",
+                                        StadiumStatus.Pending => "bg-warning text-dark",
+                                        StadiumStatus.Rejected => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @badge">@st.Status</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
